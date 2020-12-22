@@ -11,12 +11,10 @@ app = App(
 )
 
 
-@app.message(re.compile('(<https://www.notion.so/.+>)'))
-def message_notion_url(client, message, context):
-    channel_id = message["channel"]
-    # target_message_ts = message.get('ts')
-    context_matches = context
-    print(context_matches)
+@app.message(re.compile(r'(<https://www\.notion\.so/.+>)'))
+def message_notion_url(client, message):
+    channel_id = message['channel']
+    target_message_ts = message['ts']
     res = client.chat_postEphemeral(
         channel=channel_id,
         user=message['user'],
@@ -25,7 +23,7 @@ def message_notion_url(client, message, context):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Notion Web URL(`https://`)을 입력하셨군요! Notion App URL(`notion://`)로 변경할까요?"
+                    "text": "Notion Web URL(`https://`)을 사용하셨네요! Notion App URL(`notion://`)도 필요하신가요?"
                 }
             },
             {
@@ -37,7 +35,7 @@ def message_notion_url(client, message, context):
                         "text": {
                             "type": "plain_text",
                             "emoji": True,
-                            "text": "네"
+                            "text": "네!"
                         },
                         "style": "primary",
                         "action_id": "notion_fairy_true",
@@ -48,7 +46,7 @@ def message_notion_url(client, message, context):
                         "text": {
                             "type": "plain_text",
                             "emoji": True,
-                            "text": "아니요"
+                            "text": "아니요.."
                         },
                         "style": "danger",
                         "action_id": "notion_fairy_false",
@@ -58,13 +56,9 @@ def message_notion_url(client, message, context):
         ]
     )
 
-@app.event('message')
-def do_nothing():
-    pass
-
 
 @app.action(re.compile('notion_fairy_(true|false)'))
-def notion_fairy_button(client, body, ack, say, payload):
+def notion_fairy_button(client, ack, say, body, payload):
     # Acknowledge the action
     ack()
 
@@ -74,32 +68,30 @@ def notion_fairy_button(client, body, ack, say, payload):
         'delete_original': 'true',
     })    
 
-    # say(str(body))
-    # say(str(payload))
-
-    container_channel_id = body['container']['channel_id']
-
     if payload['action_id'] == 'notion_fairy_true':
+        container_channel_id = body['container']['channel_id']
         target_message_ts = payload['value']
 
+        # Fetch Message with ts
         slack_response = client.conversations_history(
             channel=container_channel_id,
             latest=target_message_ts,
             limit=1,
             inclusive=True,
         )
-
-        # print(str(slack_response))
         text = slack_response['messages'][0]['text']
-        edited_text = text.replace('https://www.notion.so', 'notion://www.notion.so')
-        say(edited_text)
-        # client.chat_update(
-        #     token=config('SLACK_USER_TOKEN'),
-        #     channel=container_channel_id,
-        #     ts=target_message_ts,
-        #     text=edited_text,
-        # )
 
+        # Replace https to notion
+        pattern = re.compile(r'(<https://www\.notion\.so/.+>)')
+        matches_with_newline = '\n'.join(pattern.findall(text))
+        edited_text = matches_with_newline.replace('https', 'notion')
+
+        say(edited_text)
+
+
+@app.event('message')
+def do_nothing():
+    pass
 
 
 # Start your app
