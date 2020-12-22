@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "notion-fairy"
+version = "0.1.0"
+description = ""
+authors = ["Junwoo Hwang <zzulu.hwang@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+python-decouple = "^3.3"
+slack-bolt = "^1.1.4"
+requests = "^2.25.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
