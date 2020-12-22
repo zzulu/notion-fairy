@@ -23,7 +23,7 @@ def message_notion_url(client, message):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Notion Web URL(`https://`)을 사용하셨네요! Notion App URL(`notion://`)도 필요하신가요?"
+                    "text": "Notion Web URL(*https://*)을 사용하셨네요! Notion App URL(*notion://*)도 필요하신가요?"
                 }
             },
             {
@@ -34,7 +34,6 @@ def message_notion_url(client, message):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "emoji": True,
                             "text": "네!"
                         },
                         "style": "primary",
@@ -45,7 +44,6 @@ def message_notion_url(client, message):
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "emoji": True,
                             "text": "아니요.."
                         },
                         "style": "danger",
