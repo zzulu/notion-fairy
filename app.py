@@ -1,13 +1,15 @@
-import os
 import re
-import requests
 from decouple import config
+import requests
+import logging
 from slack_bolt import App
+from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 
 
 app = App(
+    process_before_response=config('AWS_LAMBDA', default=False, cast=bool),
+    signing_secret=config('SLACK_SIGNING_SECRET'),
     token=config('SLACK_BOT_TOKEN'),
-    signing_secret=config('SLACK_SIGNING_SECRET')
 )
 
 
@@ -113,6 +115,15 @@ def do_nothing():
     pass
 
 
-# Start your app
+SlackRequestHandler.clear_all_log_handlers()
+logging.basicConfig(format="%(asctime)s %(message)s", level=logging.DEBUG)
+
+
+def lambda_handler(event, context):
+    slack_handler = SlackRequestHandler(app=app)
+    return slack_handler.handle(event, context)
+
+
+# Start Dev Server
 if __name__ == '__main__':
-    app.start(port=int(os.environ.get('PORT', 3000)))
+    app.start(port=3000)
