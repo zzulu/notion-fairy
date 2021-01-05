@@ -88,6 +88,14 @@ def catch_edited_notion_web_url(client, message):
             res = client.chat_postEphemeral(**options)
 
 
+@app.event({'type': 'message', 'subtype': 'message_deleted'})
+def catch_deleted_notion_web_url(client, message):
+    fairy_ts = fetch_fairy_ts(message['deleted_ts'])
+    if fairy_ts:
+        client.chat_delete(channel=message['channel'], ts=fairy_ts)
+        delete_connection(message['deleted_ts'])
+
+
 def fetch_fairy_ts(origin_ts: str) -> str:
     dynamodb = boto3.client('dynamodb')
     response = dynamodb.get_item(TableName=config('AWS_DYNAMODB_TABLE_NAME'),
@@ -99,6 +107,12 @@ def create_connection(origin_ts: str, fairy_ts: str) -> None:
     dynamodb = boto3.client('dynamodb')
     response = dynamodb.put_item(TableName=config('AWS_DYNAMODB_TABLE_NAME'),
                                  Item={'OriginTs':{'S':origin_ts},'FairyTs':{'S':fairy_ts}})
+
+
+def delete_connection(origin_ts: str) -> None:
+    dynamodb = boto3.client('dynamodb')
+    response = dynamodb.delete_item(TableName=config('AWS_DYNAMODB_TABLE_NAME'),
+                                    Key={'OriginTs':{'S':origin_ts}})
 
 
 @app.action(re.compile('notion_fairy_(true|false)'))
