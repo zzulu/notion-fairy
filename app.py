@@ -13,9 +13,10 @@ app = App(
 )
 
 
-@app.message(re.compile(r'(<https://www\.notion\.so/.+>)'))
-def message_notion_url(client, message, body):
+def create_fairy_dialog(message):
     channel_id = message['channel']
+    if message.get('subtype', '') == 'message_changed':
+        message = message['message']
     target_message_ts = message['ts']
     target_message_thread_ts = message.get('thread_ts', '')
     options = {
@@ -37,7 +38,7 @@ def message_notion_url(client, message, body):
                         'type': 'button',
                         'text': {
                             'type': 'plain_text',
-                            'text': '네!'
+                            'text': '네'
                         },
                         'style': 'primary',
                         'action_id': 'notion_fairy_true',
@@ -47,7 +48,7 @@ def message_notion_url(client, message, body):
                         'type': 'button',
                         'text': {
                             'type': 'plain_text',
-                            'text': '아니요..',
+                            'text': '아니요',
                         },
                         'style': 'danger',
                         'action_id': 'notion_fairy_false',
@@ -58,8 +59,21 @@ def message_notion_url(client, message, body):
     }
     if target_message_thread_ts:
         options['thread_ts'] = target_message_thread_ts
+    return options
 
-    res =  client.chat_postEphemeral(**options)
+
+@app.message(re.compile(r'(<https://www\.notion\.so/.+>)'))
+def catch_notion_web_url(client, message):
+    options = create_fairy_dialog(message)
+    res = client.chat_postEphemeral(**options)
+
+
+@app.event({'type': 'message', 'subtype': 'message_changed'})
+def catch_edited_notion_web_url(client, message):
+    pattern = re.compile(r'(<https://www\.notion\.so/.+>)')
+    if pattern.findall(message['message']['text']) != pattern.findall(message['previous_message']['text']):
+        options = create_fairy_dialog(message)
+        res = client.chat_postEphemeral(**options)
 
 
 @app.action(re.compile('notion_fairy_(true|false)'))
