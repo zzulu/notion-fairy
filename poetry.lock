@@ -1,28 +1,28 @@
 [[package]]
 name = "boto3"
-version = "1.4.4"
+version = "1.16.48"
 description = "The AWS SDK for Python"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-botocore = ">=1.5.0,<1.6.0"
+botocore = ">=1.19.48,<1.20.0"
 jmespath = ">=0.7.1,<1.0.0"
-s3transfer = ">=0.1.10,<0.2.0"
+s3transfer = ">=0.3.0,<0.4.0"
 
 [[package]]
 name = "botocore"
-version = "1.5.95"
+version = "1.19.48"
 description = "Low-level, data-driven core of boto 3."
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-docutils = ">=0.10"
 jmespath = ">=0.7.1,<1.0.0"
 python-dateutil = ">=2.1,<3.0.0"
+urllib3 = {version = ">=1.25.4,<1.27", markers = "python_version != \"3.4\""}
 
 [[package]]
 name = "certifi"
@@ -47,14 +47,6 @@ description = "A simple wrapper around optparse for powerful command line utilit
 category = "dev"
 optional = false
 python-versions = "*"
-
-[[package]]
-name = "docutils"
-version = "0.16"
-description = "Docutils -- Python Documentation Utilities"
-category = "dev"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "idna"
@@ -93,14 +85,14 @@ python-versions = "*"
 
 [[package]]
 name = "python-lambda"
-version = "11.7.1"
+version = "11.8.0"
 description = "The bare minimum for a Python app running on Amazon Lambda."
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-boto3 = "1.4.4"
+boto3 = ">=1.4.4"
 click = "6.6"
 PyYAML = "5.1"
 
@@ -132,14 +124,14 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 
 [[package]]
 name = "s3transfer"
-version = "0.1.13"
+version = "0.3.3"
 description = "An Amazon S3 Transfer Manager"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-botocore = ">=1.3.0,<2.0.0"
+botocore = ">=1.12.36,<2.0a.0"
 
 [[package]]
 name = "six"
@@ -193,16 +185,16 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "9fed3676240a75fd3d82cc8313e68ae6acf674440e156699b96b20d122897dc3"
+content-hash = "893c1a380462f809b23036bfd979f1cc946beaeff37219cdfd5448193f3269cf"
 
 [metadata.files]
 boto3 = [
-    {file = "boto3-1.4.4-py2.py3-none-any.whl", hash = "sha256:5050c29353fec97301116386f469fa5858ccf47201623b53cf9f74e603bda52f"},
-    {file = "boto3-1.4.4.tar.gz", hash = "sha256:518f724c4758e5a5bed114fbcbd1cf470a15306d416ff421a025b76f1d390939"},
+    {file = "boto3-1.16.48-py2.py3-none-any.whl", hash = "sha256:7b59ca28e17256ccd900c9a8c02061ce538a24b44b4d816e803e6431f8550ee0"},
+    {file = "boto3-1.16.48.tar.gz", hash = "sha256:e6915ac164a05367787db2416eeaa8662ae5e0b9c53902dbf23b407686ef5028"},
 ]
 botocore = [
-    {file = "botocore-1.5.95-py2.py3-none-any.whl", hash = "sha256:471d95025408cfafa30133991f35d2839fcc12a86198465a507499790ee49b4b"},
-    {file = "botocore-1.5.95.tar.gz", hash = "sha256:26917b37fe993dc23dd1eb69c3208500fd057dc8b2e18b7c97bb26ae08ce7aa8"},
+    {file = "botocore-1.19.48-py2.py3-none-any.whl", hash = "sha256:549aa9619b51c5b103c7bb906497f60824576366aa4e3642b4e57f9f53a06f7d"},
+    {file = "botocore-1.19.48.tar.gz", hash = "sha256:b954c596f8bdf31d5fdf1eff8a2296bde8094e1e22961a79b83bb62ddeba8a49"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
@@ -215,10 +207,6 @@ chardet = [
 click = [
     {file = "click-6.6-py2.py3-none-any.whl", hash = "sha256:fcf697e1fd4b567d817c69dab10a4035937fe6af175c05fd6806b69f74cbc6c4"},
     {file = "click-6.6.tar.gz", hash = "sha256:cc6a19da8ebff6e7074f731447ef7e112bd23adf3de5c597cf9989f2fd8defe9"},
-]
-docutils = [
-    {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
-    {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
@@ -236,8 +224,8 @@ python-decouple = [
     {file = "python-decouple-3.3.tar.gz", hash = "sha256:55c546b85b0c47a15a47a4312d451a437f7344a9be3e001660bccd93b637de95"},
 ]
 python-lambda = [
-    {file = "python-lambda-11.7.1.tar.gz", hash = "sha256:ceae00a21460901b80b96546b1a83bef587d6317690b7d0f65452110439cd5aa"},
-    {file = "python_lambda-11.7.1-py3-none-any.whl", hash = "sha256:96bb05566d7cb28dfafeb773780b1c05931301d55e58073587141aea271fa72c"},
+    {file = "python-lambda-11.8.0.tar.gz", hash = "sha256:8ab77997982dac3a4a1e9683df18074322c8011ca373f3c90975c4d983c5c528"},
+    {file = "python_lambda-11.8.0-py3-none-any.whl", hash = "sha256:7301c5ba6323497278ea79f0052d692099a9113d4cdeabae93ef784cda3d8436"},
 ]
 pyyaml = [
     {file = "PyYAML-5.1-cp27-cp27m-win32.whl", hash = "sha256:460a5a4248763f6f37ea225d19d5c205677d8d525f6a83357ca622ed541830c2"},
@@ -257,8 +245,8 @@ requests = [
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
 s3transfer = [
-    {file = "s3transfer-0.1.13-py2.py3-none-any.whl", hash = "sha256:c7a9ec356982d5e9ab2d4b46391a7d6a950e2b04c472419f5fdec70cc0ada72f"},
-    {file = "s3transfer-0.1.13.tar.gz", hash = "sha256:90dc18e028989c609146e241ea153250be451e05ecc0c2832565231dacdf59c1"},
+    {file = "s3transfer-0.3.3-py2.py3-none-any.whl", hash = "sha256:2482b4259524933a022d59da830f51bd746db62f047d6eb213f2f8855dcb8a13"},
+    {file = "s3transfer-0.3.3.tar.gz", hash = "sha256:921a37e2aefc64145e7b73d50c71bb4f26f46e4c9f414dc648c6245ff92cf7db"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

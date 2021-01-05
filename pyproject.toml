@@ -12,6 +12,7 @@ requests = "^2.25.1"
 
 [tool.poetry.dev-dependencies]
 python-lambda = "^11.7.1"
+boto3 = "^1.16.48"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
