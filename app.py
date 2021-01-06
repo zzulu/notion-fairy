@@ -81,8 +81,12 @@ def catch_edited_notion_web_url(client, message):
 
         fairy_ts = fetch_fairy_ts(target_message_ts)
         if fairy_ts:
-            edited_text = '\n'.join(matches).replace('https', 'notion')
-            client.chat_update(channel=channel, ts=fairy_ts, text=edited_text)
+            if matches:
+                edited_text = '\n'.join(matches).replace('https', 'notion')
+                client.chat_update(channel=channel, ts=fairy_ts, text=edited_text)
+            else:
+                client.chat_delete(channel=channel, ts=fairy_ts)
+                delete_connection(target_message_ts)
         else:
             options = create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
             res = client.chat_postEphemeral(**options)
