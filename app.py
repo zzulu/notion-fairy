@@ -58,7 +58,7 @@ def create_fairy_dialog(channel: str, target_message_ts: str, target_message_thr
     return options
 
 
-@app.message(re.compile(r'(<https://www\.notion\.so/.+>)'))
+@app.message(re.compile(r'(<https://www\.notion\.so/\S+>)'))
 def catch_notion_web_url(client, message):
     channel = message['channel']
     target_message_ts = message['ts']
@@ -71,7 +71,7 @@ def catch_notion_web_url(client, message):
 
 @app.event({'type': 'message', 'subtype': 'message_changed'})
 def catch_edited_notion_web_url(client, message):
-    pattern = re.compile(r'(<https://www\.notion\.so/.+>)')
+    pattern = re.compile(r'(<https://www\.notion\.so/\S+>)')
     matches = pattern.findall(message['message']['text'])
     if matches != pattern.findall(message['previous_message']['text']):
         channel = message['channel']
@@ -153,7 +153,7 @@ def notion_fairy_button(client, ack, say, body, payload):
         text = slack_response['messages'][0]['text']
 
         # Replace https to notion
-        pattern = re.compile(r'(<https://www\.notion\.so/.+>)')
+        pattern = re.compile(r'(<https://www\.notion\.so/\S+>)')
         matches_with_newline = '\n'.join(pattern.findall(text))
         edited_text = matches_with_newline.replace('https', 'notion')
 
