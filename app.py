@@ -6,56 +6,13 @@ from slack_bolt import App
 from slack_bolt.adapter.aws_lambda import SlackRequestHandler
 import boto3
 
+from components import blocks, notion
 
 app = App(
     process_before_response=config('AWS_LAMBDA', default=False, cast=bool),
     signing_secret=config('SLACK_SIGNING_SECRET'),
     token=config('SLACK_BOT_TOKEN'),
 )
-
-
-def create_fairy_dialog(channel: str, target_message_ts: str, target_message_thread_ts: str, user: str) -> dict:
-    options = {
-        'channel': channel,
-        'user': user,
-        'blocks': [
-            {
-                'type': 'section',
-                'text': {
-                    'type': 'mrkdwn',
-                    'text': 'Notion Web URL(*https://*)을 사용하셨네요! Notion App URL(*notion://*)도 필요하신가요?',
-                },
-            },
-            {
-                'type': 'actions',
-                'block_id': 'notion_fairy_dialog',
-                'elements': [
-                    {
-                        'type': 'button',
-                        'text': {
-                            'type': 'plain_text',
-                            'text': '네'
-                        },
-                        'style': 'primary',
-                        'action_id': 'notion_fairy_true',
-                        'value': f'{target_message_ts},{target_message_thread_ts}',
-                    },
-                    {
-                        'type': 'button',
-                        'text': {
-                            'type': 'plain_text',
-                            'text': '아니요',
-                        },
-                        'style': 'danger',
-                        'action_id': 'notion_fairy_false',
-                    },
-                ]
-            },
-        ],
-    }
-    if target_message_thread_ts:
-        options['thread_ts'] = target_message_thread_ts
-    return options
 
 
 @app.message(re.compile(r'(<https://www\.notion\.so/\S+>)'))
@@ -65,7 +22,7 @@ def catch_notion_web_url(client, message):
     target_message_thread_ts = message.get('thread_ts', '')
     user = message['user']
 
-    options = create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
+    options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
     res = client.chat_postEphemeral(**options)
 
 
@@ -88,7 +45,7 @@ def catch_edited_notion_web_url(client, message):
                 client.chat_delete(channel=channel, ts=fairy_ts)
                 delete_connection(target_message_ts)
         else:
-            options = create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
+            options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
             res = client.chat_postEphemeral(**options)
 
 
@@ -168,6 +125,52 @@ def notion_fairy_button(client, ack, say, body, payload):
 
         # Create connection between origin and fairy messages
         create_connection(target_message_ts, slack_response['message']['ts'])
+
+
+# Create Meeting Schedule on Notion Database
+@app.message(re.compile(r'\[.*회의.*\]'))
+def add_meeting_to_notion(client, context, message):
+    channel = message['channel']
+    user = message['user']
+    message_text = message['text']
+
+    # Parse datetime
+    pattern = re.compile(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}')
+    match = pattern.search(message_text)
+    meeting_date = match.group() if match else ''
+
+    if meeting_date:
+        # Parse title
+        pattern = re.compile(r'\[.*회의.*\]')
+        meeting_title = pattern.search(message_text).group()[1:-1]
+
+        # Get channel name
+        channel_name = client.conversations_info(channel=channel).get('channel', {}).get('name', '')
+
+        data = {
+            'database_name': channel_name,
+            'meeting_title': meeting_title,
+            'meeting_date': meeting_date,
+        }
+
+        options = blocks.meeting_schedule_block(channel, user, data=data)
+        res = client.chat_postEphemeral(**options)
+
+
+@app.action(re.compile('meeting_schedule_block_(create|close)'))
+def notion_meeting_button(client, ack, say, body, payload):
+    ack()
+
+    # Delete Container Message (Ephemeral)
+    response_url = body['response_url']
+    requests.post(response_url, json={
+        'delete_original': 'true',
+    })
+
+    if payload['action_id'] == 'meeting_schedule_block_create':
+        database_name, meeting_title, meeting_date = payload['value'].split(';')
+        created_page_url = notion.api.create_page(database_name, meeting_title, meeting_date)
+        say(f'*[{meeting_title}]*\n*{meeting_date}*\n{created_page_url}')
 
 
 @app.event('message')
