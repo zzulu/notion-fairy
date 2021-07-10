@@ -45,7 +45,7 @@ class NotionAPI:
                         },
                     ],
                 },
-                'Date Time': {
+                'Date': {
                     'date': {
                         'start': iso_date,
                     },

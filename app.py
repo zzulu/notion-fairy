@@ -170,7 +170,9 @@ def notion_meeting_button(client, ack, say, body, payload):
     if payload['action_id'] == 'meeting_schedule_block_create':
         database_name, meeting_title, meeting_date = payload['value'].split(';')
         created_page_url = notion.api.create_page(database_name, meeting_title, meeting_date)
-        say(f'*[{meeting_title}]*\n*{meeting_date}*\n{created_page_url}')
+        edited_page_url = created_page_url.replace('https', 'notion')
+
+        say(f'*[{meeting_title}]*\n*{meeting_date}*\n\n{created_page_url}\n{edited_page_url}')
 
 
 @app.event('message')
