@@ -30,7 +30,7 @@ def catch_notion_web_url(client, message):
 def catch_edited_notion_web_url(client, message):
     pattern = re.compile(r'(<https://www\.notion\.so/\S+>)')
     matches = pattern.findall(message['message']['text'])
-    if matches != pattern.findall(message['previous_message']['text']):
+    if message['previous_message'] and matches != pattern.findall(message['previous_message']['text']):
         channel = message['channel']
         target_message_ts = message['message']['ts']
         target_message_thread_ts = message['message'].get('thread_ts', '')
@@ -121,6 +121,8 @@ def notion_fairy_button(client, ack, say, body, payload):
         }
         if target_message_thread_ts:
             options['thread_ts'] = target_message_thread_ts
+        else:
+            options['thread_ts'] = target_message_ts
         slack_response = client.chat_postMessage(**options)
 
         # Create connection between origin and fairy messages
