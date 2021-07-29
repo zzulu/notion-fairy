@@ -77,7 +77,7 @@ def meeting_schedule_block(channel: str, user: str, data: dict = {}) -> dict:
                         },
                         "style": "primary",
                         "action_id": "meeting_schedule_block_create",
-                        "value": f"#{data.get('database_name')};{data.get('meeting_title','')};{data.get('meeting_date', '')}",
+                        "value": f"#{data.get('database_name')};{data.get('meeting_title','')};{data.get('meeting_date', '')};{data.get('target_message_ts', '')};{data.get('target_message_thread_ts', '')}",
                     },
                     {
                         "type": "button",
@@ -92,4 +92,6 @@ def meeting_schedule_block(channel: str, user: str, data: dict = {}) -> dict:
             },
         ],
     }
+    if data.get('target_message_thread_ts'):
+        options['thread_ts'] = data.get('target_message_thread_ts')
     return options

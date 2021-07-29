@@ -134,6 +134,8 @@ def notion_fairy_button(client, ack, say, body, payload):
 def add_meeting_to_notion(client, context, message):
     channel = message['channel']
     user = message['user']
+    target_message_ts = message['ts']
+    target_message_thread_ts = message.get('thread_ts', '')
     message_text = message['text']
 
     # Parse datetime
@@ -153,6 +155,8 @@ def add_meeting_to_notion(client, context, message):
             'database_name': channel_name,
             'meeting_title': meeting_title,
             'meeting_date': meeting_date,
+            'target_message_ts': target_message_ts,
+            'target_message_thread_ts': target_message_thread_ts,
         }
 
         options = blocks.meeting_schedule_block(channel, user, data=data)
@@ -170,11 +174,18 @@ def notion_meeting_button(client, ack, say, body, payload):
     })
 
     if payload['action_id'] == 'meeting_schedule_block_create':
-        database_name, meeting_title, meeting_date = payload['value'].split(';')
+        database_name, meeting_title, meeting_date, target_message_ts, target_message_thread_ts = payload['value'].split(';')
         created_page_url = notion.api.create_page(database_name, meeting_title, meeting_date)
         edited_page_url = created_page_url.replace('https', 'notion')
 
-        say(f'*[{meeting_title}]*\n*{meeting_date}*\n\n{created_page_url}\n{edited_page_url}')
+        text = f"*[{meeting_title}]*\n*{meeting_date}*\n\n{created_page_url}\n{edited_page_url}"
+
+        # Post message
+        options = {
+            'text': text,
+            'thread_ts': target_message_thread_ts or target_message_ts,
+        }
+        slack_response = say(**options)
 
 
 @app.event('message')
