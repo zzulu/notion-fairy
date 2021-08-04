@@ -106,7 +106,7 @@ def notion_fairy_button(client, ack, say, body, payload):
 
     if payload['action_id'] == 'notion_fairy_true':
         container_channel_id = body['container']['channel_id']
-        target_message_ts, target_message_thread_ts = payload['value'].split(',')
+        target_message_ts, target_message_thread_ts = payload['value'].split(';')
 
         # Fetch Message with ts (and thread ts)
         if target_message_thread_ts:

@@ -4,12 +4,13 @@ def create_fairy_dialog(channel: str, target_message_ts: str, target_message_thr
     options = {
         "channel": channel,
         "user": user,
+        "text": "Web URL(https://)을 사용하셨네요! App URL(notion://)도 필요하신가요?",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Notion Web URL(*https://*)을 사용하셨네요! Notion App URL(*notion://*)도 필요하신가요?",
+                    "text": "Web URL(*https://*)을 사용하셨네요! App URL(*notion://*)도 필요하신가요?",
                 },
             },
             {
@@ -24,7 +25,7 @@ def create_fairy_dialog(channel: str, target_message_ts: str, target_message_thr
                         },
                         "style": "primary",
                         "action_id": "notion_fairy_true",
-                        "value": f"{target_message_ts},{target_message_thread_ts}",
+                        "value": f"{target_message_ts};{target_message_thread_ts}",
                     },
                     {
                         "type": "button",
@@ -48,6 +49,7 @@ def meeting_schedule_block(channel: str, user: str, data: dict = {}) -> dict:
     options = {
         "channel": channel,
         "user": user,
+        "text": f"Notion 데이터베이스 '#{data.get('database_name')}'에 회의를 등록합니다.",
         "blocks": [
             {
                 "type": "context",
