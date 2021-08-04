@@ -205,4 +205,7 @@ def lambda_handler(event, context):
 
 # Start Dev Server
 if __name__ == '__main__':
-    app.start(port=3000)
+    try:
+        app.start(port=3000)
+    except KeyboardInterrupt:
+        pass
