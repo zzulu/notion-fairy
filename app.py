@@ -15,7 +15,10 @@ app = App(
 )
 
 
-@app.message(re.compile(r'(<https://www\.notion\.so/\S+>)'))
+NOTION_LINK_REGEX = r'<https://www\.notion\.so/\S+\|?.*>'
+
+
+@app.message(re.compile(NOTION_LINK_REGEX))
 def catch_notion_web_url(client, message):
     channel = message['channel']
     target_message_ts = message['ts']
@@ -28,7 +31,7 @@ def catch_notion_web_url(client, message):
 
 @app.event({'type': 'message', 'subtype': 'message_changed'})
 def catch_edited_notion_web_url(client, message):
-    pattern = re.compile(r'(<https://www\.notion\.so/\S+>)')
+    pattern = re.compile(NOTION_LINK_REGEX)
     matches = pattern.findall(message['message']['text'])
     if message['previous_message'] and matches != pattern.findall(message['previous_message']['text']):
         channel = message['channel']
@@ -110,7 +113,7 @@ def notion_fairy_button(client, ack, say, body, payload):
         text = slack_response['messages'][0]['text']
 
         # Replace https to notion
-        pattern = re.compile(r'(<https://www\.notion\.so/\S+>)')
+        pattern = re.compile(NOTION_LINK_REGEX)
         matches_with_newline = '\n'.join(pattern.findall(text))
         edited_text = matches_with_newline.replace('https', 'notion')
 
