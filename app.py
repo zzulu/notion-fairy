@@ -44,14 +44,21 @@ def notion_web_url_thread_broadcast(client, message):
 
 @app.event({'type': 'message', 'subtype': 'message_changed'})
 def message_changed(client, message):
+    channel = message['channel']
+    target_message_ts = message['message']['ts']
+    target_message_thread_ts = message['message'].get('thread_ts', '')
+    user = message['message']['user']
+
+    if message['message']['subtype'] == 'tombstone':
+        fairy_ts = connections.get_fairy_ts(target_message_ts)
+        if fairy_ts:
+            client.chat_delete(channel=channel, ts=fairy_ts)
+            connections.delete(target_message_ts)
+            return
+
     pattern = re.compile(NOTION_LINK_REGEX)
     matches = pattern.findall(message['message']['text'])
     if message['previous_message'] and matches != pattern.findall(message['previous_message']['text']):
-        channel = message['channel']
-        target_message_ts = message['message']['ts']
-        target_message_thread_ts = message['message'].get('thread_ts', '')
-        user = message['message']['user']
-
         fairy_ts = connections.get_fairy_ts(target_message_ts)
         if fairy_ts:
             if matches:
