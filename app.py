@@ -29,6 +29,20 @@ def catch_notion_web_url(client, message):
     res = client.chat_postEphemeral(**options)
 
 
+@app.event({'type': 'message', 'subtype': 'thread_broadcast'})
+def notion_web_url_thread_broadcast(client, message):
+    pattern = re.compile(NOTION_LINK_REGEX)
+    matches = pattern.findall(message['text'])
+    if matches:
+        channel = message['channel']
+        target_message_ts = message['ts']
+        target_message_thread_ts = message.get('thread_ts', '')
+        user = message['user']
+
+        options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
+        res = client.chat_postEphemeral(**options)
+
+
 @app.event({'type': 'message', 'subtype': 'message_changed'})
 def catch_edited_notion_web_url(client, message):
     pattern = re.compile(NOTION_LINK_REGEX)
@@ -192,7 +206,8 @@ def notion_meeting_button(client, ack, say, body, payload):
 
 
 @app.event('message')
-def do_nothing():
+def do_nothing(message):
+    # print(message)
     pass
 
 
