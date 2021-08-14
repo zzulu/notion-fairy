@@ -17,19 +17,63 @@ app = App(
 NOTION_LINK_REGEX = r'<https://www\.notion\.so/\S+\|?.*>'
 
 
+def get_text_from_message(client, channel, ts, thread_ts):
+    """
+    Fetch Message with ts (and thread ts)
+    """
+    if thread_ts:
+        slack_response = client.conversations_replies(
+            channel=channel,
+            ts=ts,
+            latest=thread_ts,
+            limit=1,
+            inclusive=True,
+        )
+    else:
+        slack_response = client.conversations_history(
+            channel=channel,
+            latest=ts,
+            limit=1,
+            inclusive=True,
+        )
+    return slack_response['messages'][0]['text']
+
+
+def replace_https_to_notion(text):
+    """
+    Replace https to notion
+    """
+    pattern = re.compile(NOTION_LINK_REGEX)
+    matches_with_newline = '\n'.join(pattern.findall(text))
+    return matches_with_newline.replace('https', 'notion')
+
+
 @app.message(re.compile(NOTION_LINK_REGEX))
-def catch_notion_web_url(client, message):
+def catch_notion_web_url(client, message, say):
     channel = message['channel']
     target_message_ts = message['ts']
     target_message_thread_ts = message.get('thread_ts', '')
     user = message['user']
 
-    options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
-    res = client.chat_postEphemeral(**options)
+    # options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
+    # res = client.chat_postEphemeral(**options)
+
+    text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
+    edited_text = replace_https_to_notion(text)
+
+    # Post message
+    options = {
+        'text': edited_text,
+        'thread_ts': target_message_thread_ts or target_message_ts,
+    }
+    fairy_message = say(**options)
+
+    # Create connection between origin and fairy messages
+    connections.create(target_message_ts, fairy_message['message']['ts'])
 
 
 @app.event({'type': 'message', 'subtype': 'thread_broadcast'})
-def notion_web_url_thread_broadcast(client, message):
+def notion_web_url_thread_broadcast(client, message, say):
     pattern = re.compile(NOTION_LINK_REGEX)
     matches = pattern.findall(message['text'])
     if matches:
@@ -38,18 +82,28 @@ def notion_web_url_thread_broadcast(client, message):
         target_message_thread_ts = message.get('thread_ts', '')
         user = message['user']
 
-        options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
-        res = client.chat_postEphemeral(**options)
+        text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
+        edited_text = replace_https_to_notion(text)
+
+        # Post message
+        options = {
+            'text': edited_text,
+            'thread_ts': target_message_thread_ts or target_message_ts,
+        }
+        fairy_message = say(**options)
+
+        # Create connection between origin and fairy messages
+        connections.create(target_message_ts, fairy_message['message']['ts'])
 
 
 @app.event({'type': 'message', 'subtype': 'message_changed'})
-def message_changed(client, message):
+def message_changed(client, message, say):
     channel = message['channel']
     target_message_ts = message['message']['ts']
     target_message_thread_ts = message['message'].get('thread_ts', '')
     user = message['message']['user']
 
-    if message['message']['subtype'] == 'tombstone':
+    if message['message'].get('subtype') == 'tombstone':
         fairy_ts = connections.get_fairy_ts(target_message_ts)
         if fairy_ts:
             client.chat_delete(channel=channel, ts=fairy_ts)
@@ -68,8 +122,18 @@ def message_changed(client, message):
                 client.chat_delete(channel=channel, ts=fairy_ts)
                 connections.delete(target_message_ts)
         else:
-            options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
-            res = client.chat_postEphemeral(**options)
+            text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
+            edited_text = replace_https_to_notion(text)
+
+            # Post message
+            options = {
+                'text': edited_text,
+                'thread_ts': target_message_thread_ts or target_message_ts,
+            }
+            fairy_message = say(**options)
+
+            # Create connection between origin and fairy messages
+            connections.create(target_message_ts, fairy_message['message']['ts'])
 
 
 @app.event({'type': 'message', 'subtype': 'message_deleted'})
