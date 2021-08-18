@@ -58,7 +58,9 @@ def catch_notion_web_url(client, message, say):
     # options = blocks.create_fairy_dialog(channel, target_message_ts, target_message_thread_ts, user)
     # res = client.chat_postEphemeral(**options)
 
-    text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
+    text = message['text']
+
+    # text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
     edited_text = replace_https_to_notion(text)
 
     # Post message
@@ -81,8 +83,8 @@ def notion_web_url_thread_broadcast(client, message, say):
         target_message_ts = message['ts']
         target_message_thread_ts = message.get('thread_ts', '')
         user = message['user']
+        text = message['text']
 
-        text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
         edited_text = replace_https_to_notion(text)
 
         # Post message
@@ -102,6 +104,7 @@ def message_changed(client, message, say):
     target_message_ts = message['message']['ts']
     target_message_thread_ts = message['message'].get('thread_ts', '')
     user = message['message']['user']
+    text = message['message']['text']
 
     if message['message'].get('subtype') == 'tombstone':
         fairy_ts = connections.get_fairy_ts(target_message_ts)
@@ -111,7 +114,7 @@ def message_changed(client, message, say):
             return
 
     pattern = re.compile(NOTION_LINK_REGEX)
-    matches = pattern.findall(message['message']['text'])
+    matches = pattern.findall(text)
     if message['previous_message'] and matches != pattern.findall(message['previous_message']['text']):
         fairy_ts = connections.get_fairy_ts(target_message_ts)
         if fairy_ts:
@@ -122,7 +125,6 @@ def message_changed(client, message, say):
                 client.chat_delete(channel=channel, ts=fairy_ts)
                 connections.delete(target_message_ts)
         else:
-            text = get_text_from_message(client, channel, target_message_ts, target_message_thread_ts)
             edited_text = replace_https_to_notion(text)
 
             # Post message
