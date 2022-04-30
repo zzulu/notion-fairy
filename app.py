@@ -16,28 +16,6 @@ app = App(
 NOTION_LINK_REGEX = r'<https://www\.notion\.so/\S+\|?.*>'
 
 
-def get_text_from_message(client, channel, ts, thread_ts):
-    """
-    Fetch Message with ts (and thread ts)
-    """
-    if thread_ts:
-        slack_response = client.conversations_replies(
-            channel=channel,
-            ts=ts,
-            latest=thread_ts,
-            limit=1,
-            inclusive=True,
-        )
-    else:
-        slack_response = client.conversations_history(
-            channel=channel,
-            latest=ts,
-            limit=1,
-            inclusive=True,
-        )
-    return slack_response['messages'][0]['text']
-
-
 def replace_https_to_notion(text):
     """
     Replace https to notion
@@ -48,12 +26,11 @@ def replace_https_to_notion(text):
 
 
 @app.message(re.compile(NOTION_LINK_REGEX))
-def catch_notion_web_url(client, message, say):
-    channel = message['channel']
+def catch_notion_web_url(message, say):
     target_message_ts = message['ts']
     target_message_thread_ts = message.get('thread_ts', '')
-    user = message['user']
     text = message['text']
+
     edited_text = replace_https_to_notion(text)
 
     # Post message
@@ -68,14 +45,12 @@ def catch_notion_web_url(client, message, say):
 
 
 @app.event({'type': 'message', 'subtype': 'thread_broadcast'})
-def notion_web_url_thread_broadcast(client, message, say):
+def notion_web_url_thread_broadcast(message, say):
     pattern = re.compile(NOTION_LINK_REGEX)
     matches = pattern.findall(message['text'])
     if matches:
-        channel = message['channel']
         target_message_ts = message['ts']
         target_message_thread_ts = message.get('thread_ts', '')
-        user = message['user']
         text = message['text']
 
         edited_text = replace_https_to_notion(text)
@@ -96,7 +71,6 @@ def message_changed(client, message, say):
     channel = message['channel']
     target_message_ts = message['message']['ts']
     target_message_thread_ts = message['message'].get('thread_ts', '')
-    user = message['message']['user']
     text = message['message']['text']
 
     if message['message'].get('subtype') == 'tombstone':
